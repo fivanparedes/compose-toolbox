@@ -1,0 +1,20 @@
+version: '3'
+services:
+  python:
+    build:
+      context: .
+    volumes:
+      - .:/usr/src/app
+    entrypoint: python
+    networks:
+      - default
+    # uncomment next line if you want to run this tool for another container
+    #  - external_default
+
+    
+networks:
+      external_default:
+        external: true
+      
+      default:
+        driver: bridge

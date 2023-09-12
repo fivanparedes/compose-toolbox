@@ -1,0 +1,78 @@
+# docker-compose.yml file for two laravel projects, one as a front and one as a back
+# that are in the subfolders portal and api
+# portal depends on api.
+# the db loads an init.sql file, not laravel migrations
+# add a composer service to be ran and removed on demand
+
+version: '3.7'
+
+services:
+  portal:
+    build:
+      context: ./portal
+      dockerfile: ./../Dockerfile
+    container_name: portal
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./portal:/var/www/html
+      - ./portal/.env:/var/www/html/.env
+    networks:
+      - app-network
+    depends_on:
+      - api
+    links:
+      - api
+    ports:
+      - "8000:8000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        composer install
+        php artisan serve --host=0.0.0.0 --port=8000
+
+  api:
+    build:
+      context: ./api
+      dockerfile: ./../Dockerfile
+    container_name: api
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./api:/var/www/html
+      - ./api/.env:/var/www/html/.env
+    networks:
+      - app-network
+    depends_on:
+      - db
+    ports:
+      - "8001:8000"
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        composer install
+        php artisan serve --host=0.0.0.0 --port=8000
+
+  db:
+    image: mysql:8.0.19
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: my_db
+      MYSQL_USER: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+    volumes:
+      - ./dbdata:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
