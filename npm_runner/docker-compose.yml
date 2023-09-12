@@ -1,0 +1,14 @@
+# node js run
+# docker-compose run --rm npm run dev
+
+version: '3'
+services:
+  npm:
+    image: node:current-alpine
+    container_name: npm
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - 3000:3000
+    entrypoint: npm
