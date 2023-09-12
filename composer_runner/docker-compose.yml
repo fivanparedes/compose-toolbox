@@ -1,0 +1,22 @@
+# Dockerfile-based composer runner
+# We need to build a container due to the project being PHP-7.4 bound.
+version: '3.7'
+
+services:
+  composer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: composer
+    volumes:
+      - .:/var/www
+      - ./vendor:/var/www/vendor
+    working_dir: /var/www
+    networks:
+      - app-network
+    entrypoint: ['composer']
+
+networks:
+    app-network:
+        driver: bridge
+
